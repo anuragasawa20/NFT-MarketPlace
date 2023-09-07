@@ -14,6 +14,7 @@ function Navbar() {
   const [connected, toggleConnect] = useState(false);
   const location = useLocation();
   const [currAddress, updateAddress] = useState('0x');
+  const [walletConnected, setWalletConnected] = useState(false);
 
   async function getAddress() {
     // const ethers = require("ethers");
@@ -62,16 +63,24 @@ function Navbar() {
 
     await window.ethereum.request({ method: 'eth_requestAccounts' });
 
-    updateButton();
+    //updateButton();
     console.log("here");
     getAddress();
     window.location.replace(location.pathname);
+    setWalletConnected(true);
   }
+
+  const disconnectWallet = () => {
+    window.ethereum.disconnect();
+    setWalletConnected(false);
+  };
+
 
   useEffect(() => {
     if (window.ethereum == undefined)
       return;
     let val = window.ethereum.isConnected();
+    console.log(val);
     if (val) {
       console.log("here");
       getAddress();
@@ -134,7 +143,11 @@ function Navbar() {
                 </li>
               }
               <li>
-                <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={connectWebsite}>{connected ? "Connected" : "Connect Wallet"}</button>
+                {walletConnected ? (
+                  <button onClick={disconnectWallet}>Disconnect Wallet</button>
+                ) : (
+                  <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={connectWebsite}>Connect Wallet</button>
+                )}
               </li>
             </ul>
           </li>

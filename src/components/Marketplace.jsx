@@ -2,35 +2,36 @@ import Navbar from "./Navbar";
 import NFTTile from "./NFTTile";
 import MarketplaceJSON from "../Marketplace.json";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { GetIpfsUrlFromPinata } from "../utils";
 import { ethers } from "ethers";
+
 
 export default function Marketplace() {
     const sampleData = [
         {
             "name": "NFT#1",
-            "description": "Alchemy's First NFT",
+            "description": "Bored Ape #8585",
             "website": "http://axieinfinity.io",
-            "image": "https://gateway.pinata.cloud/ipfs/QmTsRJX7r5gyubjkdmzFrKQhHv74p5wT9LdeF1m3RTqrE5",
+            "image": "https://ipfs.io/ipfs/QmZHQAMaD5F9j9UqHJ1n3srTbDeQ5vhqRoijJMr91XRJqx",
             "price": "0.03ETH",
             "currentlySelling": "True",
             "address": "0xe81Bf5A757CB4f7F82a2F23b1e59bE45c33c5b13",
         },
         {
             "name": "NFT#2",
-            "description": "Alchemy's Second NFT",
+            "description": "Normal Life",
             "website": "http://axieinfinity.io",
-            "image": "https://gateway.pinata.cloud/ipfs/QmdhoL9K8my2vi3fej97foiqGmJ389SMs55oC5EdkrxF2M",
+            "image": "https://ipfs.io/ipfs/QmQsG4gAywsc5Q4HVYbUNnZnbWQmbMn7w2u6H28kijM641",
             "price": "0.03ETH",
             "currentlySelling": "True",
             "address": "0xe81Bf5A757C4f7F82a2F23b1e59bE45c33c5b13",
         },
         {
             "name": "NFT#3",
-            "description": "Alchemy's Third NFT",
+            "description": "Bored Ape #3749",
             "website": "http://axieinfinity.io",
-            "image": "https://gateway.pinata.cloud/ipfs/QmTsRJX7r5gyubjkdmzFrKQhHv74p5wT9LdeF1m3RTqrE5",
+            "image": "https://ipfs.io/ipfs/QmZDpLf5mJ5QxjeJ7hr6DzEKK2CNURrstDjkLe62Ugxi7Z",
             "price": "0.03ETH",
             "currentlySelling": "True",
             "address": "0xe81Bf5A757C4f7F82a2F23b1e59bE45c33c5b13",
@@ -74,6 +75,7 @@ export default function Marketplace() {
     }
 
     if (!dataFetched) {
+        // alert("Please connect your wallet");
         getAllNFTs();
     }
 
@@ -91,6 +93,7 @@ export default function Marketplace() {
                     })}
                 </div>
             </div>
+         
         </div>
     );
 

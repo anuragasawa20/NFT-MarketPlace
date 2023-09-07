@@ -4,6 +4,8 @@ import { uploadFileToIPFS, uploadJSONToIPFS } from "../pinata";
 import Marketplace from '../Marketplace.json';
 import { useLocation } from "react-router";
 import { ethers } from "ethers";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function SellNFT() {
     const [formParams, updateFormParams] = useState({ name: '', description: '', price: '' });
@@ -43,6 +45,16 @@ export default function SellNFT() {
             const response = await uploadJSONToIPFS(nftJSON);
             if (response.success === true) {
                 console.log("json uploaded to pinata successfully", response);
+                toast.success('NFT Listed Successfully', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
                 return response.pinataURL;
             }
         }
@@ -60,7 +72,6 @@ export default function SellNFT() {
             const signer = provider.getSigner();
 
             updateMessage("Please wait ...... uploading (can take upto 5 mins)");
-
             let contract = new ethers.Contract(Marketplace.address, Marketplace.abi, signer);
             console.log("contract", contract);
             console.log(formParams.price);
@@ -111,6 +122,7 @@ export default function SellNFT() {
                     </button>
                 </form>
             </div>
+            <ToastContainer />
         </div>
     )
 }
