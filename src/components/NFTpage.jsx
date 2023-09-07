@@ -6,6 +6,8 @@ import axios from "axios";
 import { useState } from "react";
 import { GetIpfsUrlFromPinata } from "../pinata";
 import { ethers } from "ethers";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function NFTPage(props) {
 
@@ -15,7 +17,7 @@ export default function NFTPage(props) {
     const [dataFetched, updateDataFetched] = useState(false);
 
     async function getNFTData(tokenId) {
-
+        console.log(tokenId);
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const addr = await signer.getAddress();
@@ -66,8 +68,24 @@ export default function NFTPage(props) {
 
     const params = useParams();
     const tokenId = params.tokenId;
-    if (!dataFetched)
+    console.log(tokenId);
+
+    if (!dataFetched) {
+        if (currAddress === "0x") {
+            toast.error('Please connect to wallet First !!', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        }
         getNFTData(tokenId);
+    }
+
     if (typeof data.image == "string")
         data.image = GetIpfsUrlFromPinata(data.image);
 
@@ -104,7 +122,9 @@ export default function NFTPage(props) {
                         <div className="text-green text-center mt-3">{message}</div>
                     </div>
                 </div>
+                <ToastContainer />
             </div>
+
         </div>
     )
 }
