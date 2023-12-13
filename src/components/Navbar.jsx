@@ -7,7 +7,15 @@ import {
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { ethers } from "ethers";
+import { ParticleNetwork, WalletEntryPosition } from "@particle-network/auth";
+import { ParticleProvider } from "@particle-network/provider";
+import { Ethereum } from "@particle-network/chains";
+import Web3 from "web3";
+import axios from "axios";
 
+
+import { IcrcLedgerCanister } from "@dfinity/ledger-icrc";
+import { createAgent } from "@dfinity/utils";
 
 function Navbar() {
 
@@ -24,6 +32,30 @@ function Navbar() {
     updateAddress(addr);
   }
 
+  // const particle = new ParticleNetwork({
+  //   projectId: "5a8f9102-a170-4073-a243-14062f849ca4",
+  //   clientKey: "cGv2wa2T9LDAXkIVvKPq39PdLfN8d5B3HelaYfUz",
+  //   appId: "e573367d-b6b0-4fb2-b32a-5188a59cbf0f",
+  //   chainName: "ethereum", //optional: current chain name, default Ethereum.
+  //   chainId: 1, //optional: current chain id, default 1.
+  //   wallet: {   //optional: by default, the wallet entry is displayed in the bottom right corner of the webpage.
+  //     displayWalletEntry: true,  //show wallet entry when connect particle.
+  //     defaultWalletEntryPosition: WalletEntryPosition.BR, //wallet entry position
+  //     uiMode: "dark",  //optional: light or dark, if not set, the default is the same as web auth.
+  //     supportChains: [{ id: 1, name: "Ethereum" }, { id: 5, name: "Ethereum" }, { id: 11155111, name: "Ethereum" }], // optional: web wallet support chains.
+  //     customStyle: {}, //optional: custom wallet style
+  //   },
+  //   securityAccount: { //optional: particle security account config
+  //     //prompt set payment password. 0: None, 1: Once(default), 2: Always
+  //     promptSettingWhenSign: 1,
+  //     //prompt set master password. 0: None(default), 1: Once, 2: Always
+  //     promptMasterPasswordSettingWhenLogin: 1
+  //   },
+
+  // });
+
+
+
   function updateButton() {
     const ethereumButton = document.querySelector('.enableEthereumButton');
     ethereumButton.textContent = "Connected";
@@ -35,46 +67,133 @@ function Navbar() {
 
   async function connectWebsite() {
 
-    // const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    // if (chainId !== '0x5') {
-    //   //alert('Incorrect network! Switch your metamask network to Rinkeby');
-    //   await window.ethereum.request({
-    //     method: 'wallet_switchEthereumChain',
-    //     params: [{ chainId: '0x5' }],
-    //   })
-    // }
-    // await window.ethereum.request({ method: 'eth_requestAccounts' })
-    //   .then(() => {
-    //     updateButton();
-    //     console.log("here");
-    //     getAddress();
-    //     window.location.replace(location.pathname)
-    //   });
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const network = await provider.getNetwork();
-
-    if (network.chainId !== 11155111) {
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    console.log(chainId);
+    if (chainId !== '0x5') {
+      //alert('Incorrect network! Switch your metamask network to Rinkeby');
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '11155111' }], // ChainId for Sepolia testnet
-      });
+        params: [{ chainId: '0x5' }],
+      })
     }
-
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-    //updateButton();
-    console.log("here");
-    getAddress();
-    window.location.replace(location.pathname);
-    setWalletConnected(true);
+    await window.ethereum.request({ method: 'eth_requestAccounts' })
+      .then(() => {
+        updateButton();
+        console.log("here");
+        getAddress();
+        window.location.replace(location.pathname)
+      });
   }
+
+  //   // window.web3 = new Web3(particleProvider);
+  //   // window.web3.currentProvider.isParticleNetwork
+
+  //   const particleProvider = new ParticleProvider(particle.auth);
+  //   //init web3 with paricle provider
+  //   const web3 = new Web3(particleProvider);
+
+  //   const accounts = await web3.eth.getAccounts();
+  //   console.log(accounts);
+  //   // const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //   // const signer = provider.getSigner();
+  //   // const network = await provider.getNetwork();
+  //   // const userInfo = await particle.auth.login();
+  //   // console.log(userInfo);
+
+  //   if (!particle.auth.isLogin()) {
+  //     // Request user login if needed, returns current user info
+  //     const userInfo = await particle.auth.login();
+  //     console.log(userInfo);
+  //   }
+
+  //   // const userInfo = particle.auth.login({
+  //   //   preferredAuthType: 'jwt',
+  //   //   account: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImV4YW1wbGUyQGdtYWlsLmNvbSIsImlkIjoiNjUzMjE5ODc4NDc4ZWY5MjQxMTc0YTJiIiwiaWF0IjoxNjk4Mjk0NTIyLCJleHAiOjE2OTgyOTUxMjJ9.ZZx39CMV2Px0Q8Zai6frJnvPvzpYskQpoYGNIQllmag8IzlTnF_9fOTod2dHwP4Y3ef2VtJ_tI60Ri7gdmx0u6tvnKUgo6FibRcL3__WsAGNDZCiTXTetICstiJnFDIk19Kkth2uttZbuSlCvaONuwzcoZ6tbQPQlgvP_tIWaYIftz6dSNjZJwy8_Pj5D-cwTwRNVRFWIr_8sfwZ6M3OLGsoryZvoP0sRpXMUvscohxrC4NEPQTotI5jhDdvfgOr5e4T8wHUnbpfBWYVT9MZ6sXQINFumrHlfGNAMfB-vHr7y7DmX_t0UvfEfHtdU_krQyD8ENJLaGrN_6-5VSeoZA',
+  //   //   hideLoading: true,   //optional: hide particle loading when login.
+  //   // })
+
+  //   // if (network.chainId !== 11155111) {
+  //   //   await window.ethereum.request({N
+  //   //     method: 'wallet_switchEthereumChain',
+  //   //     params: [{ chainId: '11155111' }], // ChainId for Sepolia testnet
+  //   //   });
+  //   // }
+
+  //   // await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+  //   // //updateButton();
+  //   // console.log("here");
+  //   // getAddress();
+  //   // window.location.replace(location.pathname);
+  //   // setWalletConnected(true);
+
+  // }
+
+  // const connectWithGoogle = async () => {
+  //   const userInfo = await particle.auth.login({
+  //     preferredAuthType: 'google' //support facebook,google,twitter,apple,discord,github,twitch,microsoft,linkedin etc.
+  //   })
+
+  //   console.log(userInfo);
+  //   const email = userInfo.google_email;
+  //   const fullName = userInfo.name;
+  //   const userName = "mavens";
+  //   const walletAddress = userInfo.wallets[0].public_address;
+
+  //   console.log(email, fullName, userName, walletAddress);
+  //   try {
+  //     const response = await axios.post("https://kind-pear-puffer-tie.cyclic.cloud/loginWithGoogle", {
+  //       fullName,
+  //       userName,
+  //       email,
+  //       walletAddress
+  //     });
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+
+  // }
 
   const disconnectWallet = () => {
     window.ethereum.disconnect();
     setWalletConnected(false);
   };
 
+  // let plugConnect = async () => {
+  //   const nnsCanisterId = 'qoctq-giaaa-aaaaa-aaaea-cai'
+  //   // Whitelist
+  //   const whitelist = [
+  //     nnsCanisterId,
+  //   ];
+
+  //   // Host
+  //   const host = "https://mainnet.dfinity.network";
+
+  //   // Callback to print sessionData
+  //   const onConnectionUpdate = () => {
+  //     console.log(window.ic.plug.sessionManager.sessionData)
+  //   }
+
+  //   // '2l3jf-zj4c2-trcxt-jur3u-qhc37-nokpm-iziu5-y4q6k-rcbci-bes2b-rae'
+
+  //   // Make the request
+  //   try {
+  //     const publicKey = await window.ic.plug.requestConnect({
+  //       whitelist,
+  //       host,
+  //       onConnectionUpdate,
+  //       timeout: 50000
+  //     });
+  //     console.log(`The connected user's public key is:`, publicKey);
+
+  //     // type SessionData = { agent: HttpAgent, principalId: string, accountId: string } | null;
+  //     // console.log(window.ic.plug.principalId);
+  //     // console.log(window.ic.plug.accountId);
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // }
 
   useEffect(() => {
     if (window.ethereum == undefined)
@@ -113,6 +232,7 @@ function Navbar() {
               </div>
             </Link>
           </li>
+          {/*  */}
           <li className='w-2/6'>
             <ul className='lg:flex justify-between font-bold mr-10 text-lg'>
               {location.pathname === "/" ?
@@ -125,12 +245,12 @@ function Navbar() {
                 </li>
               }
               {location.pathname === "/sellNFT" ?
-                <li className='border-b-2 hover:pb-0 p-2'>
-                  <Link to="/sellNFT">List My NFT</Link>
+                <li className='border-b-2 hover:pb-0 p-2  '>
+                  <Link to="/sellNFT">List NFT</Link>
                 </li>
                 :
-                <li className='hover:border-b-2 hover:pb-0 p-2'>
-                  <Link to="/sellNFT">List My NFT</Link>
+                <li className='hover:border-b-2 hover:pb-0 p-2 '>
+                  <Link to="/sellNFT">List NFT</Link>
                 </li>
               }
               {location.pathname === "/profile" ?
@@ -142,6 +262,15 @@ function Navbar() {
                   <Link to="/profile">Profile</Link>
                 </li>
               }
+              {location.pathname === "/walletList" ?
+                <li className='border-b-2 hover:pb-0 p-2'>
+                  <Link to="/walletList">WalletList</Link>
+                </li>
+                :
+                <li className='hover:border-b-2 hover:pb-0 p-2'>
+                  <Link to="/walletList">WalletList</Link>
+                </li>
+              }
               <li>
                 {walletConnected ? (
                   <button onClick={disconnectWallet}>Disconnect Wallet</button>
@@ -149,10 +278,19 @@ function Navbar() {
                   <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={connectWebsite}>Connect Wallet</button>
                 )}
               </li>
+              {/* <li>
+                <button onClick={connectWithGoogle}>
+                  google
+                </button> */}
+              {/* </li> */}
             </ul>
           </li>
+
         </ul>
       </nav>
+      {/* <button onClick={plugConnect}>
+        plug
+      </button> */}
       <div className='text-white text-bold text-right mr-10 text-sm'>
         {currAddress !== "0x" ? "Connected to" : "Not Connected. Please login to view NFTs"} {currAddress !== "0x" ? (currAddress.substring(0, 15) + '...') : ""}
       </div>

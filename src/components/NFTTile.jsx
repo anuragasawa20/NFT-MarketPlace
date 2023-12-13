@@ -13,7 +13,7 @@ function NFTTile(data) {
     const IPFSUrl = GetIpfsUrlFromPinata(data.data.image);
 
     return (
-        <Link to={newTo}>
+        <Link to={newTo} >
             <div className="border-2 ml-12 mt-5 mb-12 flex flex-col items-center rounded-lg w-48 md:w-72 shadow-2xl">
                 <img alt="abc" src={IPFSUrl} className="w-80 h-80 rounded-lg object-cover" />
 
